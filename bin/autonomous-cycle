@@ -1,0 +1,89 @@
+#!/usr/bin/env bash
+# autonomous-cycle — fire one wake-up prompt at Claude Code for a project.
+# Usage: autonomous-cycle <project-slug>
+# Exit codes:
+#   0  — ran (Claude's own success/failure is in the log)
+#   2  — bad arguments
+#   3  — missing files or invalid plan
+set -euo pipefail
+
+# Load long-lived token (and any other env) for headless runs.
+ENV_FILE="$HOME/.config/autonomous-claude/env"
+[[ -f "$ENV_FILE" ]] && source "$ENV_FILE"
+
+SLUG="${1:-}"
+if [[ -z "$SLUG" ]]; then
+  echo "Usage: $0 <project-slug>" >&2
+  exit 2
+fi
+
+CLAUDE_BIN="/Users/guiman/.local/bin/claude"
+VAULT_ROOT="/Users/guiman/ai-documents/ai-projects/autonomous"
+PROMPT_FILE="$VAULT_ROOT/_wake_prompt.txt"
+PROJECT_DIR="$VAULT_ROOT/$SLUG"
+PLAN="$PROJECT_DIR/PLAN.md"
+LOG_DIR="$HOME/.local/share/autonomous-claude"
+TS="$(date +%Y%m%d-%H%M%S)"
+LOG_FILE="$LOG_DIR/${SLUG}-${TS}.log"
+
+mkdir -p "$LOG_DIR"
+
+# Sanity checks
+[[ -x "$CLAUDE_BIN" ]]  || { echo "claude binary not executable: $CLAUDE_BIN" >&2; exit 3; }
+[[ -f "$PROMPT_FILE" ]] || { echo "missing prompt template: $PROMPT_FILE" >&2; exit 3; }
+[[ -f "$PLAN" ]]        || { echo "missing plan: $PLAN" >&2; exit 3; }
+
+# Parse repo path from PLAN.md (line like "Repo: /abs/path")
+REPO="$(grep -E '^Repo:' "$PLAN" | head -1 | sed -E 's/^Repo:[[:space:]]*//')"
+[[ -d "$REPO" ]] || { echo "repo path from PLAN.md is not a directory: $REPO" >&2; exit 3; }
+
+# Substitute <SLUG> in prompt
+PROMPT="$(sed "s|<SLUG>|$SLUG|g" "$PROMPT_FILE")"
+
+# Trim session-log.md: keep preamble (everything before first "## ") + last
+# KEEP_ENTRIES "## " sections. Overflow is appended to session-log.archive.md.
+# Keeps per-cycle context small without losing history.
+SESSION_LOG="$PROJECT_DIR/session-log.md"
+ARCHIVE_LOG="$PROJECT_DIR/session-log.archive.md"
+KEEP_ENTRIES=5
+if [[ -f "$SESSION_LOG" ]]; then
+  TOTAL=$(grep -c '^## ' "$SESSION_LOG" || true)
+  if (( TOTAL > KEEP_ENTRIES )); then
+    DROP=$((TOTAL - KEEP_ENTRIES))
+    awk -v drop="$DROP" -v preamble_out="$SESSION_LOG.preamble" \
+        -v archive_out="$ARCHIVE_LOG" -v keep_out="$SESSION_LOG.keep" '
+      BEGIN { section = 0 }
+      /^## / { section++ }
+      section == 0 { print > preamble_out; next }
+      section <= drop { print >> archive_out; next }
+      { print > keep_out }
+    ' "$SESSION_LOG"
+    cat "$SESSION_LOG.preamble" "$SESSION_LOG.keep" > "$SESSION_LOG"
+    rm -f "$SESSION_LOG.preamble" "$SESSION_LOG.keep"
+  fi
+fi
+
+cd "$REPO"
+
+{
+  echo "=== autonomous cycle ==="
+  echo "slug:    $SLUG"
+  echo "repo:    $REPO"
+  echo "started: $(date -Iseconds)"
+  echo "log:     $LOG_FILE"
+  echo "---"
+  # Use --add-dir=PATH (equals form). Space-separated "--add-dir PATH <prompt>"
+  # causes claude's parser to swallow the prompt into the dir slot and then
+  # either error ("Input must be provided…") or hang silently.
+  "$CLAUDE_BIN" \
+    --print \
+    --output-format stream-json \
+    --verbose \
+    --permission-mode default \
+    --model claude-sonnet-4-6 \
+    "--add-dir=$VAULT_ROOT" \
+    "$PROMPT" \
+    < /dev/null
+  echo "---"
+  echo "finished: $(date -Iseconds)"
+} >> "$LOG_FILE" 2>&1

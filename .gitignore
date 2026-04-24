@@ -1,0 +1,16 @@
+# Never commit secrets
+.env
+env
+*.env
+*.token
+*.secret
+
+# macOS noise
+.DS_Store
+
+# Editor
+.vscode/
+.idea/
+
+# Runtime artifacts (logs live under ~/.local/share, but belt-and-braces)
+*.log

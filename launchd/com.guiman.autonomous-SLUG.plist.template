@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  Per-project launchd schedule. Copy to:
+      ~/Library/LaunchAgents/com.guiman.autonomous-<slug>.plist
+  Then substitute the literal string SLUG with the actual project slug:
+      sed -i '' 's/SLUG/myproject/g' ~/Library/LaunchAgents/com.guiman.autonomous-myproject.plist
+  And load it:
+      launchctl bootstrap "gui/$(id -u)" ~/Library/LaunchAgents/com.guiman.autonomous-myproject.plist
+
+  StartInterval=18000 (5h) aligns with the 5h usage-limit window.
+  RunAtLoad fires a cycle immediately on load.
+-->
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.guiman.autonomous-SLUG</string>
+
+    <key>ProgramArguments</key>
+    <array>
+        <string>/Users/guiman/.local/bin/autonomous-cycle</string>
+        <string>SLUG</string>
+    </array>
+
+    <key>StartInterval</key>
+    <integer>18000</integer>
+
+    <key>RunAtLoad</key>
+    <true/>
+
+    <key>StandardOutPath</key>
+    <string>/Users/guiman/.local/share/autonomous-claude/launchd-SLUG.out.log</string>
+
+    <key>StandardErrorPath</key>
+    <string>/Users/guiman/.local/share/autonomous-claude/launchd-SLUG.err.log</string>
+
+    <key>EnvironmentVariables</key>
+    <dict>
+        <key>PATH</key>
+        <string>/Users/guiman/.local/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin</string>
+        <key>HOME</key>
+        <string>/Users/guiman</string>
+    </dict>
+
+    <key>ProcessType</key>
+    <string>Background</string>
+
+    <key>Nice</key>
+    <integer>10</integer>
+</dict>
+</plist>

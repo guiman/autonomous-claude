@@ -1,0 +1,56 @@
+#!/usr/bin/env bash
+# autonomous-watch [slug] — tail the latest autonomous-cycle log and pretty-print stream-json events.
+# Usage:
+#   autonomous-watch           # latest log of any slug
+#   autonomous-watch dino      # latest log for slug "dino"
+set -u
+
+SLUG="${1:-}"
+LOG_DIR="$HOME/.local/share/autonomous-claude"
+
+if [[ -n "$SLUG" ]]; then
+  LATEST=$(ls -t "$LOG_DIR"/"${SLUG}"-*.log 2>/dev/null | head -1)
+else
+  LATEST=$(ls -t "$LOG_DIR"/*.log 2>/dev/null | grep -v '/launchd-' | head -1)
+fi
+
+[[ -z "$LATEST" ]] && { echo "no log found in $LOG_DIR" >&2; exit 1; }
+
+echo "tailing: $LATEST"
+echo "---"
+
+tail -n +1 -F "$LATEST" | while IFS= read -r line; do
+  [[ -z "$line" ]] && continue
+  # Non-JSON (script header/footer): print verbatim
+  if [[ "$line" != \{* ]]; then
+    printf '%s\n' "$line"
+    continue
+  fi
+  printf '%s\n' "$line" | jq -r '
+    if .type == "system" then
+      "[session " + (.subtype // "start") + "]"
+    elif .type == "assistant" then
+      (.message.content[]? |
+        if .type == "text" then
+          "💭 " + (.text // "" | .[0:500] | gsub("\n"; " ⏎ "))
+        elif .type == "tool_use" then
+          "🔧 " + (.name // "?") + "  " + ((.input // {}) | tostring | .[0:240])
+        elif .type == "thinking" then
+          "🧠 " + (.thinking // "" | .[0:400] | gsub("\n"; " ⏎ "))
+        else empty end)
+    elif .type == "user" then
+      (.message.content[]? |
+        if .type == "tool_result" then
+          "  ✓ " + (
+            if (.content | type) == "array" then
+              ([.content[] | (.text // "")] | join(" "))
+            else
+              (.content // "" | tostring)
+            end | .[0:400] | gsub("\n"; " ⏎ "))
+        else empty end)
+    elif .type == "result" then
+      "═══ done: " + (.subtype // "?") + " (cost $" + ((.total_cost_usd // 0) | tostring) + ", " + ((.duration_ms // 0) / 1000 | tostring) + "s) ═══"
+    else empty
+    end
+  ' 2>/dev/null || true
+done

@@ -1,0 +1,23 @@
+You are running an autonomous work cycle for project: <SLUG>
+
+Read these files in order:
+
+1. /Users/guiman/ai-documents/ai-projects/autonomous/_runbook.md
+   This is the contract governing all autonomous work. Follow it exactly.
+
+2. /Users/guiman/ai-documents/ai-projects/autonomous/<SLUG>/PLAN.md
+   This is the project's live state. The "Repo:" field is your working directory. The "Branch:" field is the branch you must be on.
+
+3. List the directory /Users/guiman/ai-documents/ai-projects/autonomous/<SLUG>/blockers/
+   If any files exist, halt per the runbook — append a session-log entry explaining you halted because of open blockers, then stop.
+
+4. Read the last entry of /Users/guiman/ai-documents/ai-projects/autonomous/<SLUG>/session-log.md
+   For continuity with the previous cycle.
+
+Then work tasks starting at the CURSOR, following the runbook's rules:
+- One commit per task in the code repo, message "T<n>: <one-line summary>".
+- Never push. Never edit Goal, Guardrails, or _runbook.md.
+- After each task: tick the checkbox, move CURSOR, append to session-log.
+- Halt cleanly on any stop condition. Always finish the current task or revert before stopping — never leave a half-edit.
+
+Begin.
