@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  Per-project launchd schedule. Rendered by `install.sh schedule <slug>` which
+  substitutes:
+      __SLUG__       → your project slug
+      __HOME__       → $HOME at render time (plist paths cannot use ~ or $HOME)
+      __LABEL_PFX__  → the Label prefix (default: "autonomous"; settable via
+                       LABEL_PREFIX env var)
+
+  StartInterval=18000 (5h) aligns with the usage-limit window.
+  RunAtLoad fires a cycle immediately on load.
+-->
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>__LABEL_PFX__.__SLUG__</string>
+
+    <key>ProgramArguments</key>
+    <array>
+        <string>__HOME__/.local/bin/autonomous-cycle</string>
+        <string>__SLUG__</string>
+    </array>
+
+    <key>StartInterval</key>
+    <integer>18000</integer>
+
+    <key>RunAtLoad</key>
+    <true/>
+
+    <key>StandardOutPath</key>
+    <string>__HOME__/.local/share/autonomous-claude/launchd-__SLUG__.out.log</string>
+
+    <key>StandardErrorPath</key>
+    <string>__HOME__/.local/share/autonomous-claude/launchd-__SLUG__.err.log</string>
+
+    <key>EnvironmentVariables</key>
+    <dict>
+        <key>PATH</key>
+        <string>__HOME__/.local/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin</string>
+        <key>HOME</key>
+        <string>__HOME__</string>
+    </dict>
+
+    <key>ProcessType</key>
+    <string>Background</string>
+
+    <key>Nice</key>
+    <integer>10</integer>
+</dict>
+</plist>

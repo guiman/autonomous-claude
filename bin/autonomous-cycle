@@ -17,8 +17,9 @@ if [[ -z "$SLUG" ]]; then
   exit 2
 fi
 
-CLAUDE_BIN="/Users/guiman/.local/bin/claude"
-VAULT_ROOT="/Users/guiman/ai-documents/ai-projects/autonomous"
+# Both overridable via env (e.g. in ~/.config/autonomous-claude/env).
+CLAUDE_BIN="${CLAUDE_BIN:-$(command -v claude || echo "$HOME/.local/bin/claude")}"
+VAULT_ROOT="${VAULT_ROOT:-$HOME/autonomous-vault}"
 PROMPT_FILE="$VAULT_ROOT/_wake_prompt.txt"
 PROJECT_DIR="$VAULT_ROOT/$SLUG"
 PLAN="$PROJECT_DIR/PLAN.md"
