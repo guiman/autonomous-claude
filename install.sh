@@ -106,7 +106,7 @@ cmd_schedule() {
   local domain="gui/$(id -u)"
   launchctl bootout "$domain/$label" 2>/dev/null || true
   launchctl bootstrap "$domain" "$plist"
-  say "ok  $label loaded (fires immediately, then every 5h)"
+  say "ok  $label loaded (fires immediately, then every 1h)"
 }
 
 cmd_unschedule() {

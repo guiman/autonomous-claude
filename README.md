@@ -1,6 +1,6 @@
 # Autonomous Claude
 
-Scheduler + scaffolding that wakes Claude Code every 5 hours to pick up a project, do the next task on the plan, commit, and halt. Designed to continue work across usage-limit windows so long-running projects make progress even when you're asleep or AFK.
+Scheduler + scaffolding that wakes Claude Code every hour to pick up a project, do the next task on the plan, commit, and halt. Designed to continue work across usage-limit windows so long-running projects make progress even when you're asleep or AFK — the agent retries hourly and resumes as soon as the 5h Anthropic limit window resets.
 
 See [_runbook.md](_runbook.md) for the agent-side contract. This file is the operator-side documentation: how the system is wired, how to use it, and the macOS gotchas we hit setting it up.
 
@@ -11,7 +11,7 @@ Currently macOS only (the scheduler uses `launchd`). Linux equivalent would be a
 ## Architecture
 
 ```
-launchd (every 5h)
+launchd (every 1h)
       │
       ▼
 ~/.local/bin/autonomous-cycle <slug>              bash wrapper
@@ -162,7 +162,7 @@ Tails the newest log and pretty-prints stream-json events (`💭 text`, `🔧 to
 When a task requires a decision, the agent writes a file into `<slug>/blockers/` and halts. To unblock:
 
 1. Edit the blocker file, append a `## Resolution` section with your answer — or delete the file if the answer is obvious.
-2. Fire the next cycle immediately (otherwise wait for the 5h interval):
+2. Fire the next cycle immediately (otherwise wait for the next hourly interval):
    ```sh
    launchctl kickstart "gui/$(id -u)/<prefix>.<slug>"
    # or

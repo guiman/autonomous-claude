@@ -8,7 +8,9 @@
       __LABEL_PFX__  → the Label prefix (default: "autonomous"; settable via
                        LABEL_PREFIX env var)
 
-  StartInterval=18000 (5h) aligns with the usage-limit window.
+  StartInterval=3600 (1h). The 5h usage-limit window will reject most of
+  these; that's fine — a rejected fire is cheap, and firing hourly means
+  the agent resumes quickly once the window resets.
   RunAtLoad fires a cycle immediately on load.
 -->
 <plist version="1.0">
@@ -23,7 +25,7 @@
     </array>
 
     <key>StartInterval</key>
-    <integer>18000</integer>
+    <integer>3600</integer>
 
     <key>RunAtLoad</key>
     <true/>
