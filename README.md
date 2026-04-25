@@ -2,7 +2,9 @@
 
 Scheduler + scaffolding that wakes Claude Code every hour to pick up a project, do the next task on the plan, commit, and halt. Designed to continue work across usage-limit windows so long-running projects make progress even when you're asleep or AFK — the agent retries hourly and resumes as soon as the 5h Anthropic limit window resets.
 
-See [_runbook.md](_runbook.md) for the agent-side contract. This file is the operator-side documentation: how the system is wired, how to use it, and the macOS gotchas we hit setting it up.
+- [PATTERN.md](PATTERN.md) — the underlying pattern, transport-agnostic. Read this first if you want to understand or port the workflow.
+- [_runbook.md](_runbook.md) — the contract the agent re-reads each wake.
+- This file (README) — how to install and run *this* macOS implementation.
 
 Currently macOS only (the scheduler uses `launchd`). Linux equivalent would be a `systemd --user` timer — not implemented here.
 
