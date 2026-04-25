@@ -1,12 +1,21 @@
 # Autonomous Claude
 
-Scheduler + scaffolding that wakes Claude Code every hour to pick up a project, do the next task on the plan, commit, and halt. Designed to continue work across usage-limit windows so long-running projects make progress even when you're asleep or AFK — the agent retries hourly and resumes as soon as the 5h Anthropic limit window resets.
+> My Claude Code sessions kept dying mid-task at the 5h usage cap. Hours of work, gone. So I wrote a contract that lets the agent resume itself across resets — and a pattern that ports to anything that can fire a cron.
 
-- [PATTERN.md](PATTERN.md) — the underlying pattern, transport-agnostic. Read this first if you want to understand or port the workflow.
-- [_runbook.md](_runbook.md) — the contract the agent re-reads each wake.
-- This file (README) — how to install and run *this* macOS implementation.
+Treat the agent like a contractor. You sit down together, scope the work, write the tickets. Then they go and do it on their own time — committing per ticket, escalating when ambiguous, halting cleanly when blocked. Each cycle wakes a fresh agent that reads its state from disk, does one task, persists state, and exits. When the next cycle fires, it resumes exactly where the last one left off, regardless of whether the last one finished or got killed by a usage-limit reset.
 
-Currently macOS only (the scheduler uses `launchd`). Linux equivalent would be a `systemd --user` timer — not implemented here.
+Built around three artifacts:
+- a `PLAN.md` with a `CURSOR` pointing at the next task
+- a `_runbook.md` the agent re-reads each wake (the contract)
+- a `blockers/` directory the agent halts on (the escalation channel)
+
+**Read these in order:**
+
+- **[PATTERN.md](PATTERN.md)** — the durable idea, transport-agnostic. Start here if you want to port it to GitHub Actions, systemd, or hosted scheduled agents.
+- **[_runbook.md](_runbook.md)** — the contract the agent re-reads every wake.
+- This file (**README**) — how to install and run the macOS implementation.
+
+What this **isn't**: a polished product. It's a weekend artifact that solves a real problem for me (subscription-tier Claude with 5h caps, side-project work I want to make progress on overnight). Currently macOS-only — the scheduler uses `launchd`. Linux equivalent would be a `systemd --user` timer; not implemented. Needs your laptop awake and logged in.
 
 ---
 
