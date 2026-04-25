@@ -2,16 +2,16 @@ You are running an autonomous work cycle for project: <SLUG>
 
 Read these files in order:
 
-1. /Users/guiman/ai-documents/ai-projects/autonomous/_runbook.md
+1. <VAULT>/_runbook.md
    This is the contract governing all autonomous work. Follow it exactly.
 
-2. /Users/guiman/ai-documents/ai-projects/autonomous/<SLUG>/PLAN.md
+2. <VAULT>/<SLUG>/PLAN.md
    This is the project's live state. The "Repo:" field is your working directory. The "Branch:" field is the branch you must be on.
 
-3. List the directory /Users/guiman/ai-documents/ai-projects/autonomous/<SLUG>/blockers/
+3. List the directory <VAULT>/<SLUG>/blockers/
    If any files exist, halt per the runbook — append a session-log entry explaining you halted because of open blockers, then stop.
 
-4. Read the last entry of /Users/guiman/ai-documents/ai-projects/autonomous/<SLUG>/session-log.md
+4. Read the last entry of <VAULT>/<SLUG>/session-log.md
    For continuity with the previous cycle.
 
 Then work tasks starting at the CURSOR, following the runbook's rules:

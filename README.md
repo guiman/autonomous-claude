@@ -84,7 +84,7 @@ Paste the `sk-ant-oat01-…` value into `~/.config/autonomous-claude/env`:
 export CLAUDE_CODE_OAUTH_TOKEN="sk-ant-oat01-..."
 
 # Optional overrides (see env.example):
-# export VAULT_ROOT="$HOME/ai-documents/ai-projects/autonomous"
+# export VAULT_ROOT="$HOME/path/to/your/vault"
 # export CLAUDE_BIN="$HOME/.local/bin/claude"
 ```
 

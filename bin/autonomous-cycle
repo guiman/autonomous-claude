@@ -38,8 +38,8 @@ mkdir -p "$LOG_DIR"
 REPO="$(grep -E '^Repo:' "$PLAN" | head -1 | sed -E 's/^Repo:[[:space:]]*//')"
 [[ -d "$REPO" ]] || { echo "repo path from PLAN.md is not a directory: $REPO" >&2; exit 3; }
 
-# Substitute <SLUG> in prompt
-PROMPT="$(sed "s|<SLUG>|$SLUG|g" "$PROMPT_FILE")"
+# Substitute placeholders in prompt: <SLUG> and <VAULT>
+PROMPT="$(sed -e "s|<SLUG>|$SLUG|g" -e "s|<VAULT>|$VAULT_ROOT|g" "$PROMPT_FILE")"
 
 # Trim session-log.md: keep preamble (everything before first "## ") + last
 # KEEP_ENTRIES "## " sections. Overflow is appended to session-log.archive.md.
