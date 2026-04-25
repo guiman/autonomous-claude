@@ -6,6 +6,24 @@ This document describes the *pattern*. The bash scripts and launchd plist in thi
 
 ---
 
+## The mental model
+
+Think of the agent as a contractor you've hired. Before they touch any code, you sit down together: agree on the goal, write the scope, break it into tickets, decide what's in-bounds and what needs your sign-off. Then they go do the work on their own time, and check in only when they need you.
+
+This pattern is the scaffolding for that working relationship:
+
+- The interactive session where you build the plan = scoping the contract
+- `PLAN.md` = the ticket list, in execution order
+- `Goal` and `Guardrails` in the plan = the statement of work — what's in scope, what's not
+- `_runbook.md` = the working agreement — when to ask, when to act, how to deliver
+- `blockers/` = "I'm stuck, please clarify before I continue"
+- One commit per task = a per-ticket deliverable, reviewable independently
+- Branch-per-project = the contractor's working branch; you review before merging to your trunk
+
+The agent doesn't redesign the job mid-execution. It executes what was agreed, escalates when ambiguous, and ships per-ticket so you can review without context-switching the whole thing.
+
+This implies: **the pattern's value scales with the quality of the plan.** Cycles fired against a fuzzy PLAN.md produce fuzzy work, the same way a vague SOW produces a bad contractor. The interactive scoping session is not optional — it's the whole point of separating "design with the agent" from "execute alone."
+
 ## Problem
 
 Coding agents on hosted plans (Claude, ChatGPT, etc.) hit usage limits. Sessions end. Laptops sleep. Long-running work — refactors, multi-feature builds, large migrations — that takes longer than one session window dies at the boundary, or worse, leaves the repo in a half-edited state with no clean way to resume.
